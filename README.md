@@ -8,6 +8,7 @@ TODO:
 ###### Set session cookies
 ###### Cron
 ###### caching
+###### create a logging system
 
 ###### Persistence Layer:
 	- class Log {
@@ -29,20 +30,6 @@ TODO:
 	- void PurgeData()
 	
 ###### User interaction layer:
-	
-	- Model:
-		
-		class AuthenticationRequest {
-			String userName, password;
-			AuthenticationRequest(String userName, String password);
-			String getUserName();
-			void setUserName(String userName);
-			String getPassword();
-			void setPassword(String Password);
-		}
-		class MappingRequest {
-			// (regular stuff)
-		}
 		
 	- View:
 		- Main page: 
