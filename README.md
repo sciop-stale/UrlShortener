@@ -7,6 +7,7 @@ TODO:
 ###### Https
 ###### Set session cookies
 ###### Cron
+###### caching
 
 ###### Persistence Layer:
 	- class Log {
@@ -45,10 +46,10 @@ TODO:
 		
 	- View:
 		- Main page: 
-			- links to login, signin if signed out.
+			- links to login, signup if signed out.
 			- new mapping form, list of owned mappings, link to sign out
 		- Login form
-		- Signin form
+		- Signup form
 		
 	- Controller:
 		- Form GETs

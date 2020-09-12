@@ -1,4 +1,4 @@
-package com.sciops.shortener;
+package com.sciops.shortener.persistency;
 
 import java.util.List;
 
