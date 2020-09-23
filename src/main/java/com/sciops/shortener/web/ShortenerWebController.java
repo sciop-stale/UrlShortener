@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import com.sciops.shortener.GetService;
 import com.sciops.shortener.PostService;
+import com.sciops.shortener.model.UrlMappingRequest;
 import com.sciops.shortener.persistency.UrlMapping;
 import com.sciops.shortener.persistency.UrlMappingRepository;
-import com.sciops.shortener.web.model.UrlMappingRequest;
 
 @Controller
-public class WebController {
+public class ShortenerWebController {
 	
 	@Autowired
 	private UrlMappingRepository urlMappings;
@@ -31,7 +31,7 @@ public class WebController {
 	@Autowired
 	private Environment environment;
 	
-	public WebController() {
+	public ShortenerWebController() {
 		
 	}
 	

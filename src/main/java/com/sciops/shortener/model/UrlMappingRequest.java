@@ -1,4 +1,4 @@
-package com.sciops.shortener.web.model;
+package com.sciops.shortener.model;
 
 public class UrlMappingRequest {
 	

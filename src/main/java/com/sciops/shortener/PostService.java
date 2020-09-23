@@ -3,9 +3,9 @@ package com.sciops.shortener;
 import java.util.Calendar;
 import java.util.Random;
 
+import com.sciops.shortener.model.UrlMappingRequest;
 import com.sciops.shortener.persistency.UrlMapping;
 import com.sciops.shortener.persistency.UrlMappingRepository;
-import com.sciops.shortener.web.model.UrlMappingRequest;
 
 public class PostService {
 
