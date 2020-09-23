@@ -15,14 +15,14 @@ public class RepositoryTests {
 	@Autowired UrlMappingRepository umr;
 	
 	@Test
-	void RepositoryLoadsTest() {
+	void repositoryLoadsTest() {
 		assertNotNull(umr);
 		assertNotNull(umr.count());
 		assertEquals(0, umr.count());
 	}
 	
 	@Test
-	void MappingCorrectlySavedTest() {
+	void mappingCorrectlySavedTest() {
 		UrlMapping urlMapping = new UrlMapping("shortUrl", "longUrl", 10, false);
 		umr.save(urlMapping);
 		assertEquals("shortUrl", umr.findById(urlMapping.getId()).getInput());

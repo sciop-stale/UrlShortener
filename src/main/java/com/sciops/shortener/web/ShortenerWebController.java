@@ -60,7 +60,7 @@ public class ShortenerWebController {
 			postMessage = "New link created for: " + mapping.getOutput();
 			model.addAttribute("link", ip + "/" + mapping.getInput());
 		}
-		else postMessage = "Unable to do it!";
+		else postMessage = "Rejected";
 		
 		model.addAttribute("postMessage", postMessage);
 		return "main";
@@ -92,7 +92,8 @@ public class ShortenerWebController {
 				}
 			}
 		} else {
-			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+			if(mapping.isArchived()) response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+			else response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 			response.setHeader("location", url.toString());
 			response.setHeader("Connection", "close");
 		}

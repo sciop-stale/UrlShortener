@@ -8,6 +8,11 @@ import com.sciops.shortener.persistency.UrlMapping;
 import com.sciops.shortener.persistency.UrlMappingRepository;
 
 public class PostService {
+	private static final int MIN_LENGTH = 5; 
+
+	public static int getMinLength() {
+		return MIN_LENGTH;
+	}
 
 	public static UrlMapping processNewBinding(UrlMappingRequest request, UrlMappingRepository repo) {
 		
@@ -24,12 +29,18 @@ public class PostService {
 		return mapping;
 	}
 
-	private static boolean validateRequest(UrlMappingRequest request) {
+	static boolean validateRequest(UrlMappingRequest request) {
 		
-		for(int i = 0; i < request.getSuggestedKey().length(); i++) {
-			char c = request.getSuggestedKey().charAt(i);
-			if(!(Character.isDigit(c) || Character.isLetter(c) || c == '-' || c == '_' || c == '~'))
-				return false;
+		if(request == null) return false;
+		
+		if(request.getSuggestedKey() != null) {
+			if(request.getSuggestedKey().length() < getMinLength()) return false;
+		
+			for(int i = 0; i < request.getSuggestedKey().length(); i++) {
+				char c = request.getSuggestedKey().charAt(i);
+				if(!(Character.isDigit(c) || Character.isLetter(c) || c == '-' || c == '_' || c == '~'))
+					return false;
+			}
 		}
 		
 		for(int i = 0; i < request.getValue().length(); i++) {
@@ -47,16 +58,16 @@ public class PostService {
 		return true;
 	}
 
-	private static String newRandomUrl(UrlMappingRepository repo) {
+	static String newRandomUrl(UrlMappingRepository repo) {
 		String ans = "";
 		Random random = new Random();
 		do {
 			ans += randomIntToChar(random.nextInt(65));
-		} while(ans.length() < 5 || repo.findByInput(ans) != null);
+		} while(ans.length() < getMinLength() || repo.findByInput(ans) != null);
 		return ans;
 	}
 
-	private static char randomIntToChar(int i) {
+	static char randomIntToChar(int i) {
 		if(i < 26) return (char) ('A' + i);
 		if(i < 52) return (char) ('a' + i - 26);
 		if(i < 62) return (char) ('0' + i - 52);
