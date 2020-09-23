@@ -2,18 +2,20 @@ package com.sciops.shortener.web.model;
 
 public class UrlMappingRequest {
 	
-	private final String suggestedKey;
+	private String suggestedKey;
 	private final String value;
-	private final byte[] sessionId;
 	private final long expiration;
 	private final boolean singleUse;
 	
-	public UrlMappingRequest(String suggestedKey, String value, byte[] sessionId, long expiration, boolean singleUse) {
+	public UrlMappingRequest(String suggestedKey, String value, long expiration, boolean singleUse) {
 		this.suggestedKey = suggestedKey;
 		this.value = value;
-		this.sessionId = sessionId;
 		this.expiration = expiration;
 		this.singleUse = singleUse;
+	}
+	
+	public void setSuggestedKey(String suggestedKey) {
+		this.suggestedKey = suggestedKey;
 	}
 
 	public String getSuggestedKey() {
@@ -22,10 +24,6 @@ public class UrlMappingRequest {
 
 	public String getValue() {
 		return value;
-	}
-
-	public byte[] getSessionId() {
-		return sessionId;
 	}
 
 	public long getExpiration() {

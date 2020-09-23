@@ -1,12 +1,9 @@
 package com.sciops.shortener.persistency;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 @Entity
 public class UrlMapping {
@@ -20,10 +17,6 @@ public class UrlMapping {
 	private String output;
 	private long expiration;
 	
-	@ManyToOne(fetch = FetchType.LAZY, optional = true)
-	@JoinColumn
-	private User user;
-	
 	private boolean singleUse;
 	private boolean archived;
 	
@@ -31,11 +24,10 @@ public class UrlMapping {
 		
 	}
 
-	public UrlMapping(String input, String output, long expiration, boolean singleUse, User user) {
+	public UrlMapping(String input, String output, long expiration, boolean singleUse) {
 		this.input = input;
 		this.output = output;
 		this.expiration = expiration;
-		this.user = user;
 		this.singleUse = singleUse;
 		this.setArchived(false);
 		
@@ -60,14 +52,6 @@ public class UrlMapping {
 	public boolean isSingleUse() {
 		return singleUse;
 	}
-	
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
 
 	public boolean isArchived() {
 		return archived;
@@ -84,7 +68,6 @@ public class UrlMapping {
 		result = prime * result + (int) (expiration ^ (expiration >>> 32));
 		result = prime * result + ((input == null) ? 0 : input.hashCode());
 		result = prime * result + ((output == null) ? 0 : output.hashCode());
-		result = prime * result + ((user == null) ? 0 : user.hashCode());
 		result = prime * result + (singleUse ? 1231 : 1237);
 		result = prime * result + (int) (urlMappingId ^ (urlMappingId >>> 32));
 		return result;
@@ -111,11 +94,6 @@ public class UrlMapping {
 				return false;
 		} else if (!output.equals(other.output))
 			return false;
-		if (user == null) {
-			if (other.user != null)
-				return false;
-		} else if (!user.equals(other.user))
-			return false;
 		if (singleUse != other.singleUse)
 			return false;
 		if (urlMappingId != other.urlMappingId)
@@ -126,7 +104,7 @@ public class UrlMapping {
 	@Override
 	public String toString() {
 		return "UrlMapping [urlMappingId=" + urlMappingId + ", input=" + input + ", output=" + output + ", expiration="
-				+ expiration + ", owner=" + user + ", singleUse=" + singleUse + "]";
+				+ expiration + ", singleUse=" + singleUse + "]";
 	}
 
 }

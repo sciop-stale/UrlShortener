@@ -8,10 +8,6 @@ public interface UrlMappingRepository extends PagingAndSortingRepository<UrlMapp
 
 	UrlMapping findById(long id);
 	
-	List<UrlMapping> findByUser(User user);
-	
-	long countByUser(User user);
-	
 	UrlMapping findByInput(String input);
 	
 	long deleteByExpirationLessThanEqual(long expiration);

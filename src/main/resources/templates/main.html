@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta charset="UTF-8">
+	<title>Url Shortener</title>
+	<link rel="stylesheet" href="style.css"/>
+	</head>
+	<body>
+		<div>
+			<form action="/" method="post">
+				<fieldset>
+					<div>
+						<div>URL to be shortened: </div>
+						<input type="text" name="value" required/>
+					</div>
+					<div>
+						<div>(Optional) suggested shortened URL: </div>
+						<input type="text" name="suggestedKey"/>
+					</div>
+					<div style="display:none">
+						<div>(Optional) expiration date: </div>
+						<input type="date" name="expiration"/>
+						<input type="time" name="expiration_2"/>
+					</div>
+					<div>
+						<div>Single use: </div>
+						<input type="checkbox" name="singleUse"/>
+					</div>
+					<input type="submit" value="submit"/>
+				</fieldset>
+			</form>
+		</div>
+		<div>
+			<div>
+				<div th:text="${postMessage} ?: ''">Link creation feedback</div>
+				<textarea th:text="${link}" th:style="${link} ?: 'display:none;'">Copy area</textarea>
+			</div>
+		</div>
+	</body>
+</html>
