@@ -66,7 +66,7 @@ public class WebController {
 		return "main";
 	}
 	
-	@GetMapping("/{id}") // TODO exclude style.css, favicon.ico, ???
+	@GetMapping("/{id}")
 	public void restGetRedirectCoordinates(HttpServletResponse response, @PathVariable("id") String id) {
 		
 		UrlMapping mapping = GetService.processGetBinding(id, urlMappings);
@@ -92,18 +92,9 @@ public class WebController {
 				}
 			}
 		} else {
-			try {
-				response.sendRedirect(url.toString());
-			
-				// TODO status 301
-				
-			} catch (IOException e) {
-				try {
-					response.sendError(500);
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-			}
+			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+			response.setHeader("location", url.toString());
+			response.setHeader("Connection", "close");
 		}
 	}
 	
