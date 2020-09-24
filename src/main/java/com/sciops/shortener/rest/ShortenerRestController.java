@@ -17,25 +17,25 @@ import com.sciops.shortener.persistency.UrlMappingRepository;
 public class ShortenerRestController {
 	
 	@Autowired
-	private UrlMappingRepository urlMappings;
+	private UrlMappingRepository repo;
 	
 	public ShortenerRestController() {
 		
 	}
 	
 	@PostMapping("/rest")
-	public UrlMapping restPostRedirectCoordinates(@RequestParam(value="suggestedKey") String suggestedKey,
-												  @RequestParam(value="value") String value,
-												  @RequestParam(value="expiration") long expiration,
-												  @RequestParam(value="singleUse") boolean singleUse) {
+	public UrlMapping restNewMappingRequest(@RequestParam(value="suggestedInput") String suggestedInput,
+											@RequestParam(value="output") String output,
+											@RequestParam(value="expiration") long expiration,
+											@RequestParam(value="singleUse") boolean singleUse) {
 		
-		UrlMappingRequest request = new UrlMappingRequest(suggestedKey, value, expiration, singleUse);
-		return PostService.processNewBinding(request, urlMappings);
+		UrlMappingRequest request = new UrlMappingRequest(suggestedInput, output, expiration, singleUse);
+		return PostService.processNewMapping(request, repo);
 		
 	}
 	
 	@GetMapping("/rest/{id}")
-	public UrlMapping redirect(@PathVariable("id") String id) {
-		return GetService.processGetBinding(id, urlMappings);
+	public UrlMapping restGetMapping(@PathVariable("id") String id) {
+		return GetService.processMappingGetRequest(id, repo);
 	}
 }

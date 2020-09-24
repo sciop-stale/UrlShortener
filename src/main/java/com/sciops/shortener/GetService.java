@@ -10,7 +10,7 @@ import com.sciops.shortener.persistency.UrlMappingRepository;
 public class GetService {
 	
 	@Cacheable(value="urlmappings", unless="(#result != null) && (#result.isArchived() == true)")
-	public static UrlMapping processGetBinding(String request, UrlMappingRepository repo) {
+	public static UrlMapping processMappingGetRequest(String request, UrlMappingRepository repo) {
 		
 		UrlMapping ans = repo.findByInput(request);
 		

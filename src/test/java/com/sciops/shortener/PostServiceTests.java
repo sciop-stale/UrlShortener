@@ -141,7 +141,7 @@ public class PostServiceTests {
 	void processNewBindingBadRequestTest() {
 		
 		UrlMappingRequest request = new UrlMappingRequest("aaa*a", "a", 0, false);
-		assertNull(PostService.processNewBinding(request, repo));
+		assertNull(PostService.processNewMapping(request, repo));
 		
 	}
 	
@@ -149,7 +149,7 @@ public class PostServiceTests {
 	void processNewBindingCorrectRequestTest() {
 		
 		UrlMappingRequest request = new UrlMappingRequest("google", "http://www.google.com", 0, false);
-		UrlMapping mapping = PostService.processNewBinding(request, repo);
+		UrlMapping mapping = PostService.processNewMapping(request, repo);
 		assertNotNull(mapping);
 		
 	}
@@ -158,9 +158,9 @@ public class PostServiceTests {
 	void processNewBindingDuplicateRequestTest() {
 		
 		UrlMappingRequest request = new UrlMappingRequest("google", "http://www.google.com", 0, false);
-		UrlMapping mapping = PostService.processNewBinding(request, repo);
+		UrlMapping mapping = PostService.processNewMapping(request, repo);
 		
-		mapping = PostService.processNewBinding(request, repo);
+		mapping = PostService.processNewMapping(request, repo);
 		assertNull(mapping);
 		
 	}
@@ -169,10 +169,10 @@ public class PostServiceTests {
 	void processNewBindingDifferentBindingsEmptySuggestionTest() {
 		
 		UrlMappingRequest request = new UrlMappingRequest(null, "http://www.google.com", 0, false);
-		UrlMapping mapping = PostService.processNewBinding(request, repo);
+		UrlMapping mapping = PostService.processNewMapping(request, repo);
 		assertNotNull(mapping);
 		String first = mapping.getInput();
-		mapping = PostService.processNewBinding(request, repo);
+		mapping = PostService.processNewMapping(request, repo);
 		assertNotNull(mapping);
 		assertNotEquals(first, mapping.getInput());
 		

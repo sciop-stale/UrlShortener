@@ -3,6 +3,8 @@ Simple URL shortener service with Spring.
 
 ##### Work in progress
 
-TODO:
-###### create a logging system
+Missing features:
+###### logs
 ###### (see TODOs)
+
+###### Front-end

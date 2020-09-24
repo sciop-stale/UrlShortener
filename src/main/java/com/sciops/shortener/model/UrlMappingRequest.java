@@ -2,28 +2,28 @@ package com.sciops.shortener.model;
 
 public class UrlMappingRequest {
 	
-	private String suggestedKey;
-	private final String value;
+	private String suggestedInput;
+	private final String output;
 	private final long expiration;
 	private final boolean singleUse;
 	
-	public UrlMappingRequest(String suggestedKey, String value, long expiration, boolean singleUse) {
-		this.suggestedKey = suggestedKey;
-		this.value = value;
+	public UrlMappingRequest(String suggestedInput, String output, long expiration, boolean singleUse) {
+		this.suggestedInput = suggestedInput;
+		this.output = output;
 		this.expiration = expiration;
 		this.singleUse = singleUse;
 	}
 	
-	public void setSuggestedKey(String suggestedKey) {
-		this.suggestedKey = suggestedKey;
+	public void setSuggestedInput(String suggestedInput) {
+		this.suggestedInput = suggestedInput;
 	}
 
-	public String getSuggestedKey() {
-		return suggestedKey;
+	public String getSuggestedInput() {
+		return suggestedInput;
 	}
 
-	public String getValue() {
-		return value;
+	public String getOutput() {
+		return output;
 	}
 
 	public long getExpiration() {
@@ -32,6 +32,12 @@ public class UrlMappingRequest {
 
 	public boolean isSingleUse() {
 		return singleUse;
+	}
+
+	@Override
+	public String toString() {
+		return "UrlMappingRequest [suggestedInput=" + suggestedInput + ", output=" + output + ", expiration="
+				+ expiration + ", singleUse=" + singleUse + "]";
 	}
 	
 }

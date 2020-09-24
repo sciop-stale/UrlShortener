@@ -14,16 +14,16 @@ public class PostService {
 		return MIN_LENGTH;
 	}
 
-	public static UrlMapping processNewBinding(UrlMappingRequest request, UrlMappingRepository repo) {
+	public static UrlMapping processNewMapping(UrlMappingRequest request, UrlMappingRepository repo) {
 		
 		if(!validateRequest(request)) return null;
-		if(repo.findByInput(request.getSuggestedKey()) != null) return null;
+		if(repo.findByInput(request.getSuggestedInput()) != null) return null;
 		UrlMapping mapping;
-		if(request.getSuggestedKey() == null || request.getSuggestedKey().length() == 0) {
-			mapping = new UrlMapping(newRandomUrl(repo), request.getValue(), request.getExpiration(), 
+		if(request.getSuggestedInput() == null || request.getSuggestedInput().length() == 0) {
+			mapping = new UrlMapping(newRandomUrl(repo), request.getOutput(), request.getExpiration(), 
 									 request.isSingleUse());
 		}
-		else mapping = new UrlMapping(request.getSuggestedKey(), request.getValue(), 
+		else mapping = new UrlMapping(request.getSuggestedInput(), request.getOutput(), 
 												request.getExpiration(), request.isSingleUse());
 		if(repo.save(mapping) == null) return null;
 		return mapping;
@@ -33,18 +33,18 @@ public class PostService {
 		
 		if(request == null) return false;
 		
-		if(request.getSuggestedKey() != null) {
-			if(request.getSuggestedKey().length() < getMinLength()) return false;
+		if(request.getSuggestedInput() != null && request.getSuggestedInput().length() > 0) {
+			if(request.getSuggestedInput().length() < getMinLength()) return false;
 		
-			for(int i = 0; i < request.getSuggestedKey().length(); i++) {
-				char c = request.getSuggestedKey().charAt(i);
+			for(int i = 0; i < request.getSuggestedInput().length(); i++) {
+				char c = request.getSuggestedInput().charAt(i);
 				if(!(Character.isDigit(c) || Character.isLetter(c) || c == '-' || c == '_' || c == '~'))
 					return false;
 			}
 		}
 		
-		for(int i = 0; i < request.getValue().length(); i++) {
-			char c = request.getValue().charAt(i);
+		for(int i = 0; i < request.getOutput().length(); i++) {
+			char c = request.getOutput().charAt(i);
 			if(!(Character.isDigit(c) || Character.isLetter(c) || c == '-' || c == '_' || c == '~' || 
 				 c == '.' || c == ':' || c == '/' || c == '?' || c == '#' || c == '[' || c == ']' || 
 				 c == '@' || c == '!' || c == '$' || c == '&' || c == '\'' || c == '(' || c == ')' || 

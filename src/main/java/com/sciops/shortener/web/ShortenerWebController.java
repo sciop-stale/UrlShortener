@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import com.sciops.shortener.GetService;
 import com.sciops.shortener.PostService;
 import com.sciops.shortener.model.UrlMappingRequest;
@@ -26,7 +27,7 @@ import com.sciops.shortener.persistency.UrlMappingRepository;
 public class ShortenerWebController {
 	
 	@Autowired
-	private UrlMappingRepository urlMappings;
+	private UrlMappingRepository repo;
 	
 	@Autowired
 	private Environment environment;
@@ -42,14 +43,16 @@ public class ShortenerWebController {
 	}
 	
 	@PostMapping("/")
-	public String newMapping(Model model, HttpServletRequest request) throws UnknownHostException {
+	public String newMapping(Model model, 
+							 @RequestParam(value="suggestedInput") String suggestedInput,
+							 @RequestParam(value="output") String output,
+							 @RequestParam(value="expiration") long expiration,
+							 @RequestParam(value="singleUse") boolean singleUse) 
+									 throws UnknownHostException {
 		
-		UrlMappingRequest req = new UrlMappingRequest(request.getParameter("suggestedKey"),
-													  request.getParameter("value"),
-													  0, // TODO set this
-													  request.getParameter("singleUse") != null);
+		UrlMappingRequest req = new UrlMappingRequest(suggestedInput, output, expiration, singleUse);
 		
-		UrlMapping mapping = PostService.processNewBinding(req, urlMappings);
+		UrlMapping mapping = PostService.processNewMapping(req, repo);
 		
 		String postMessage = "";
 		if(mapping != null) {
@@ -67,9 +70,9 @@ public class ShortenerWebController {
 	}
 	
 	@GetMapping("/{id}")
-	public void restGetRedirectCoordinates(HttpServletResponse response, @PathVariable("id") String id) {
+	public void getMapping(HttpServletResponse response, @PathVariable("id") String id) {
 		
-		UrlMapping mapping = GetService.processGetBinding(id, urlMappings);
+		UrlMapping mapping = GetService.processMappingGetRequest(id, repo);
 		URL url = null;
 		if(mapping != null)
 			try {
