@@ -29,11 +29,13 @@ public class PostService {
 		return mapping;
 	}
 
-	static boolean validateRequest(UrlMappingRequest request) {
+	private static boolean validateRequest(UrlMappingRequest request) {
 		
 		if(request == null) return false;
 		
-		if(request.getSuggestedInput() != null && request.getSuggestedInput().length() > 0) {
+		if(request.getSuggestedInput() == null) return false;
+		if(request.getOutput() == null) return false;
+		if(request.getSuggestedInput().length() > 0) {
 			if(request.getSuggestedInput().length() < getMinLength()) return false;
 		
 			for(int i = 0; i < request.getSuggestedInput().length(); i++) {
@@ -58,16 +60,17 @@ public class PostService {
 		return true;
 	}
 
-	static String newRandomUrl(UrlMappingRepository repo) {
+	private static String newRandomUrl(UrlMappingRepository repo) {
 		String ans = "";
 		Random random = new Random();
 		do {
 			ans += randomIntToChar(random.nextInt(65));
 		} while(ans.length() < getMinLength() || repo.findByInput(ans) != null);
+		System.out.println(ans);
 		return ans;
 	}
 
-	static char randomIntToChar(int i) {
+	private static char randomIntToChar(int i) {
 		if(i < 26) return (char) ('A' + i);
 		if(i < 52) return (char) ('a' + i - 26);
 		if(i < 62) return (char) ('0' + i - 52);

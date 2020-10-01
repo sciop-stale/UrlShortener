@@ -1,180 +1,126 @@
 package com.sciops.shortener;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.sciops.shortener.model.UrlMappingRequest;
 import com.sciops.shortener.persistency.UrlMapping;
 import com.sciops.shortener.persistency.UrlMappingRepository;
 
-@SpringBootTest
-public class PostServiceTests {
+@SpringBootTest public class PostServiceTests {
 	
-	@Autowired
-	private UrlMappingRepository repo;
-	
-	@BeforeEach
-	void flushRepo() {
+	@Mock private UrlMappingRepository repo;
 
-		repo.deleteAll();
+	@Mock private UrlMappingRequest request_too_short;
+	@Mock private UrlMappingRequest request_empty_input;
+	@Mock private UrlMappingRequest request_incorrect_input;
+	@Mock private UrlMappingRequest request_incorrect_output;
+	@Mock private UrlMappingRequest request_expired;
+	@Mock private UrlMappingRequest request_correct_with_input_that_does_not_exist;
+	@Mock private UrlMappingRequest request_with_input_that_exists;
+	@Mock private UrlMappingRequest request_correct_with_empty_input;
+	
+	@Mock private UrlMapping mapping_that_exists;
+	
+	@BeforeEach void flushRepo() {
+
+		MockitoAnnotations.initMocks(this);
+		
+		when(request_too_short.getSuggestedInput()).thenReturn("1234");
+		
+		when(request_empty_input.getSuggestedInput()).thenReturn(null);
+		
+		when(request_incorrect_input.getSuggestedInput()).thenReturn("12/456");
+		
+		when(request_incorrect_output.getSuggestedInput()).thenReturn("12345");
+		when(request_incorrect_output.getOutput()).thenReturn("12¬çñ´456");
+		
+		when(request_expired.getExpiration()).thenReturn(1L);
+		
+		when(request_correct_with_input_that_does_not_exist.getSuggestedInput()).thenReturn("input_with_no_presence_in_db");
+		when(request_correct_with_input_that_does_not_exist.getOutput()).thenReturn("");
+		
+		when(request_with_input_that_exists.getSuggestedInput()).thenReturn("input_with_presence_in_db");
+		when(request_with_input_that_exists.getOutput()).thenReturn("");
+		
+		when(request_correct_with_empty_input.getSuggestedInput()).thenReturn("");
+		when(request_correct_with_empty_input.getOutput()).thenReturn("");
+		
+		when(repo.findByInput(anyString())).thenReturn(null);
+		when(repo.findByInput("input_with_presence_in_db")).thenReturn(mapping_that_exists);
+		when(repo.findByInput("input_with_no_presence_in_db")).thenReturn(null);
+		when(repo.save(any())).thenReturn(mapping_that_exists);
+		
 		
 	}
-
-	@Test
-	void intToCharTest() {
-		assertEquals('A', PostService.randomIntToChar(0));
-		assertEquals('Z', PostService.randomIntToChar(25));
-		assertEquals('a', PostService.randomIntToChar(26));
-		assertEquals('z', PostService.randomIntToChar(51));
-		assertEquals('0', PostService.randomIntToChar(52));
-		assertEquals('9', PostService.randomIntToChar(61));
-		assertEquals('-', PostService.randomIntToChar(62));
-		assertEquals('_', PostService.randomIntToChar(63));
-		assertEquals('~', PostService.randomIntToChar(64));
-	}
 	
-	@Test
-	void newRandomUrlTest() {
-		
-		Set<String> set = new HashSet<>();
-		for(int i = 0; i < 1000; i++) {
-			String aux = PostService.newRandomUrl(repo);
-			assertFalse(aux.length() < PostService.getMinLength());
-			assertFalse(set.contains(aux));
-
-			UrlMapping mapping = new UrlMapping(aux, "", 0, false);
-			repo.save(mapping);
-		}
-	}
-	
-	@Test
-	void validateRequestNullTest() {
+	@Test void validateRequestNullTest() {
 		UrlMappingRequest request = null;
-		assertFalse(PostService.validateRequest(request));
-	}
-	
-	@Test
-	void validateRequestInputTooShortTest() {
-		
-		UrlMappingRequest request = new UrlMappingRequest("aaaa", "a", 0, false);
-		assertFalse(PostService.validateRequest(request));
-		
-		request = new UrlMappingRequest("", "a", 0, false);
-		assertFalse(PostService.validateRequest(request));
-		
-	}
-	
-	@Test
-	void validateRequestInputWithDisallowedCharactersTest() {
-		
-		UrlMappingRequest request = new UrlMappingRequest("a/aaa", "a", 0, false);
-		assertFalse(PostService.validateRequest(request));
-		
-		request = new UrlMappingRequest("aaa+a", "a", 0, false);
-		assertFalse(PostService.validateRequest(request));
-		
-		request = new UrlMappingRequest("aaaa\\", "a", 0, false);
-		assertFalse(PostService.validateRequest(request));
-		
-		request = new UrlMappingRequest("?aaaa", "a", 0, false);
-		assertFalse(PostService.validateRequest(request));
-		
-	}
-	
-	@Test
-	void validateRequestOutputWithDisallowedCharactersTest() {
-		
-		UrlMappingRequest request = new UrlMappingRequest("aaaaa", "a/aaa", 0, false);
-		assertTrue(PostService.validateRequest(request));
-		
-		request = new UrlMappingRequest("aaaaa", "aaa+a", 0, false);
-		assertTrue(PostService.validateRequest(request));
-		
-		request = new UrlMappingRequest("aaaaa", "aaaa\'", 0, false);
-		assertTrue(PostService.validateRequest(request));
-		
-		request = new UrlMappingRequest("aaaaa", "?aaaa", 0, false);
-		assertTrue(PostService.validateRequest(request));
-		
-		request = new UrlMappingRequest("aaaaa", "aaaa\\", 0, false);
-		assertFalse(PostService.validateRequest(request));
-		
-	}
-	
-	@Test
-	void validateRequestExpired() {
-		long time = Calendar.getInstance().getTimeInMillis();
-		try {
-			Thread.sleep(1000, 0);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		UrlMappingRequest request = new UrlMappingRequest("aaaaa", "aaaaa", time, false);
-		assertFalse(PostService.validateRequest(request));
-	}
-	
-	@Test
-	void validateRequestCorrectTest() {
-		
-		UrlMappingRequest request = new UrlMappingRequest("aaaaa", "a", 0, false);
-		assertTrue(PostService.validateRequest(request));
-		
-		request = new UrlMappingRequest("aaaaa", "a", Calendar.getInstance().getTimeInMillis() + 1000, false);
-		assertTrue(PostService.validateRequest(request));
-		
-	}
-	
-	@Test
-	void processNewBindingBadRequestTest() {
-		
-		UrlMappingRequest request = new UrlMappingRequest("aaa*a", "a", 0, false);
 		assertNull(PostService.processNewMapping(request, repo));
+		verifyNoInteractions(repo);
+	}
+	
+	@Test void validateRequestInputTooShortTest() {
+		
+		assertNull(PostService.processNewMapping(request_too_short, repo));
+		verifyNoInteractions(repo);
 		
 	}
 	
-	@Test
-	void processNewBindingCorrectRequestTest() {
+	@Test void validateRequestInputWithDisallowedCharactersTest() {
 		
-		UrlMappingRequest request = new UrlMappingRequest("google", "http://www.google.com", 0, false);
-		UrlMapping mapping = PostService.processNewMapping(request, repo);
-		assertNotNull(mapping);
+		assertNull(PostService.processNewMapping(request_incorrect_input, repo));
+		verifyNoInteractions(repo);
 		
 	}
 	
-	@Test
-	void processNewBindingDuplicateRequestTest() {
+	@Test void validateRequestOutputWithDisallowedCharactersTest() {
 		
-		UrlMappingRequest request = new UrlMappingRequest("google", "http://www.google.com", 0, false);
-		UrlMapping mapping = PostService.processNewMapping(request, repo);
-		
-		mapping = PostService.processNewMapping(request, repo);
-		assertNull(mapping);
+		assertNull(PostService.processNewMapping(request_incorrect_output, repo));
+		verifyNoInteractions(repo);
 		
 	}
 	
-	@Test
-	void processNewBindingDifferentBindingsEmptySuggestionTest() {
+	@Test void validateRequestExpired() {
 		
-		UrlMappingRequest request = new UrlMappingRequest(null, "http://www.google.com", 0, false);
-		UrlMapping mapping = PostService.processNewMapping(request, repo);
-		assertNotNull(mapping);
-		String first = mapping.getInput();
-		mapping = PostService.processNewMapping(request, repo);
-		assertNotNull(mapping);
-		assertNotEquals(first, mapping.getInput());
+		assertNull(PostService.processNewMapping(request_expired, repo));
+		verifyNoInteractions(repo);
+		
+	}
+	
+	@Test void processNewBindingDuplicateRequestTest() {
+		
+		assertNull(PostService.processNewMapping(request_with_input_that_exists, repo));
+		verify(repo).findByInput(any());
+		verify(repo, never()).save(any());
+		
+	}
+	
+	@Test void correctRequestTest() {
+		
+		assertNotNull(PostService.processNewMapping(request_correct_with_input_that_does_not_exist, repo));
+		verify(repo).findByInput(any());
+		verify(repo).save(any());
+		
+	}
+	
+	@Test void correctRequestWithEmptySuggestionTest() {
+		
+		assertNotNull(PostService.processNewMapping(request_correct_with_empty_input, repo));
+		verify(repo, atLeastOnce()).findByInput(any());
+		verify(repo).save(any());
 		
 	}
 	

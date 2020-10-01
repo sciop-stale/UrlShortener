@@ -6,12 +6,10 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface UrlMappingRepository extends PagingAndSortingRepository<UrlMapping, Long> {
 
-	UrlMapping findById(long id);
-	
 	UrlMapping findByInput(String input);
 	
-	long deleteByExpirationLessThanEqual(long expiration);
+	List<UrlMapping> findByExpirationLessThanEqualAndArchivedFalse(long expiration);
 	
-	List<UrlMapping> removeByExpirationLessThanEqual(long expiration);
+	int countByArchivedFalse();
 
 }

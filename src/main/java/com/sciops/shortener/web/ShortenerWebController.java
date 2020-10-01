@@ -44,10 +44,10 @@ public class ShortenerWebController {
 	
 	@PostMapping("/")
 	public String newMapping(Model model, 
-							 @RequestParam(value="suggestedInput") String suggestedInput,
-							 @RequestParam(value="output") String output,
-							 @RequestParam(value="expiration") long expiration,
-							 @RequestParam(value="singleUse") boolean singleUse) 
+							 @RequestParam(value="suggestedInput", defaultValue="") String suggestedInput,
+							 @RequestParam(value="output", defaultValue="") String output,
+							 @RequestParam(value="expiration", defaultValue="0") long expiration,
+							 @RequestParam(value="singleUse", defaultValue="false") boolean singleUse) 
 									 throws UnknownHostException {
 		
 		UrlMappingRequest req = new UrlMappingRequest(suggestedInput, output, expiration, singleUse);
@@ -95,7 +95,7 @@ public class ShortenerWebController {
 				}
 			}
 		} else {
-			if(mapping.isArchived()) response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+			if(mapping.isSingleUse()) response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 			else response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
 			response.setHeader("location", url.toString());
 			response.setHeader("Connection", "close");

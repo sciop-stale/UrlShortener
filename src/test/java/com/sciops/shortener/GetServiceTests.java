@@ -3,119 +3,107 @@ package com.sciops.shortener;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.Mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.sciops.shortener.model.UrlMappingRequest;
 import com.sciops.shortener.persistency.UrlMapping;
 import com.sciops.shortener.persistency.UrlMappingRepository;
 
 @SpringBootTest
 public class GetServiceTests {
 	
-	@Autowired
+	@Mock
 	private UrlMappingRepository repo;
+	
+	@Mock
+	private UrlMapping um;
+	
+	@Mock
+	private UrlMapping um_archived;
+	
+	@Mock
+	private UrlMapping um_expired_but_unchecked;
+	
+	@Mock
+	private UrlMapping um_single_use;
 
 	@BeforeEach
 	void flushRepo() {
 
-		repo.deleteAll();
+		MockitoAnnotations.initMocks(this);
+		when(repo.findByInput("normal_entry")).thenReturn(um);
+		when(repo.findByInput("not_exists")).thenReturn(null);
+		when(repo.findByInput("archived")).thenReturn(um_archived);
+		when(repo.findByInput("expired_but_unchecked")).thenReturn(um_expired_but_unchecked);
+		when(repo.findByInput("single_use")).thenReturn(um_single_use);
+		
+		when(um.getExpiration()).thenReturn(0L);
+		when(um.getInput()).thenReturn("entry_input");
+		
+		when(um_archived.isArchived()).thenReturn(true);
+		
+		when(um_expired_but_unchecked.getExpiration()).thenReturn(1L);
+		
+		when(um_single_use.isSingleUse()).thenReturn(true);
 		
 	}
 	
 	@Test
 	void noRecordTest() {
-		assertNull(GetService.processMappingGetRequest("whatever", repo));
+		
+		assertNull(GetService.processMappingGetRequest("not_exists", repo));
+		
 	}
 	
 	@Test
 	void archivedTest() {
-		UrlMapping um = PostService.processNewMapping(new UrlMappingRequest("archivedTest", "google.com", 0, true), repo);
-		um.setArchived(true);
-		repo.save(um);
 		
-		assertNull(GetService.processMappingGetRequest("archivedTest", repo));
+		assertNull(GetService.processMappingGetRequest("archived", repo));
+		
+	}
+	
+	@Test
+	void singleUseIsReturnedTest() {
+		
+		assertNotNull(GetService.processMappingGetRequest("single_use", repo));
+		
 	}
 	
 	@Test
 	void singleUseIsArchivedTest() {
-		PostService.processNewMapping(new UrlMappingRequest("singleUseIsArchivedTest", "google.com", 0, true), repo);
-		GetService.processMappingGetRequest("singleUseIsArchivedTest", repo);
 		
-		assertNull(GetService.processMappingGetRequest("singleUseIsArchivedTest", repo));
+		GetService.processMappingGetRequest("single_use", repo);
+		
+		verify(um_single_use).setArchived(true);
+		
 	}
 	
 	@Test
 	void expiredIsArchivedTest() {
-		UrlMappingRequest umr =  new UrlMappingRequest("expiredIsArchivedTest", "google.com",
-									Calendar.getInstance().getTimeInMillis() + 200, false);
-		PostService.processNewMapping(umr, repo);
-		assertNotNull(GetService.processMappingGetRequest("expiredIsArchivedTest", repo));
-		try {
-			Thread.sleep(201);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		assertNull(GetService.processMappingGetRequest("expiredIsArchivedTest", repo));
+		
+		GetService.processMappingGetRequest("expired_but_unchecked", repo);
+		
+		verify(um_expired_but_unchecked).setArchived(true);
+		
+	}
+	
+	@Test
+	void expiredIsNotReturnedTest() {
+		
+		assertNull(GetService.processMappingGetRequest("expired_but_unchecked", repo));
+		
 	}
 	
 	@Test
 	void correctGetBindingTest() {
-		long exp = Calendar.getInstance().getTimeInMillis() + 1000;
-		PostService.processNewMapping(new UrlMappingRequest("correctGetBindingTest", "google.com", exp, false), repo);
-		UrlMapping um = GetService.processMappingGetRequest("correctGetBindingTest", repo);
-		assertEquals("correctGetBindingTest", um.getInput());
-		assertEquals("google.com", um.getOutput());
-		assertEquals(exp, um.getExpiration());
-		assertEquals(false, um.isSingleUse());
-		assertEquals(false, um.isArchived());
+		assertEquals("entry_input", GetService.processMappingGetRequest("normal_entry", repo).getInput());
 	}
 	
-	@Test
-	void cachePseudoTest() {
-		List<String> q = new ArrayList<String>();
-		List<String> names = new ArrayList<String>(); 
-		long[][] times = new long[2][2];
-		for(int i = 0; i < 1100; i++) {
-			if(i == 0 || (i >= 100 && i < 600)) {
-				names.add(PostService.processNewMapping(new UrlMappingRequest(null, "w/e", 0, true), repo).getInput());
-				GetService.processMappingGetRequest(names.get(names.size() - 1), repo);
-			}
-			else names.add(PostService.processNewMapping(new UrlMappingRequest(null, "w/e", 0, false), repo).getInput());
-		}
-		
-		// "No caching" ~~> all queries are different
-		times[0][0] = Calendar.getInstance().getTimeInMillis();
-		for(int i = 100; i < 1100; i++) {
-			GetService.processMappingGetRequest(names.get(i), repo);
-		}
-		times[0][1] = Calendar.getInstance().getTimeInMillis();
-		
-		// "Caching" with 98/2
-		Random random = new Random();
-		for(int i = 0; i < 1000; i++) {
-			int aux = random.nextInt(100);
-			if(aux == 0) q.add(names.get(random.nextInt(98) + 2));
-			else q.add(names.get(random.nextInt(2)));
-		}
-		times[1][0] = Calendar.getInstance().getTimeInMillis();
-		for(String s : q) {
-			GetService.processMappingGetRequest(s, repo);
-		}
-		times[1][1] = Calendar.getInstance().getTimeInMillis();
-		long f = times[0][1] - times[0][0];
-		long s = times[1][1] - times[1][0];
-		assertTrue(s < f);
-		// System.out.println(f + " vs " + s);
-	}
+	//TODO test the cache is working
 	
 }
